@@ -436,6 +436,9 @@ func (dr *DockerRegistry) validate() (bool, []error) {
 	if _, err := os.Stat(dr.CAPath); dr.CAPath != "" && os.IsNotExist(err) {
 		v.addError(fmt.Errorf("Docker Registry CA file was not found at %q", dr.CAPath))
 	}
+	if dr.Username != "" && dr.Password == "" {
+		v.addError(fmt.Errorf("Docker Registry password cannot be blank for username %q", dr.Username))
+	}
 	return v.valid()
 }
 

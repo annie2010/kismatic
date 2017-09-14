@@ -38,6 +38,8 @@
   * [address](#docker_registryaddress)
   * [port](#docker_registryport)
   * [CA](#docker_registryCA)
+  * [username](#docker_registryusername)
+  * [password](#docker_registrypassword)
 * [add_ons](#add_ons)
   * [cni](#add_onscni)
     * [disable](#add_onscnidisable)
@@ -419,6 +421,26 @@
 ###  docker_registry.CA
 
  The absolute path of the Certificate Authority that should be installed on all cluster nodes that have a docker daemon. This is required to establish trust between the daemons and the private registry when the registry is using a self-signed certificate. 
+
+| | |
+|----------|-----------------|
+| **Kind** |  string |
+| **Required** |  No |
+| **Default** | ` ` | 
+
+###  docker_registry.username
+
+ If the registry requires authentication provide the username and password below. Otherwise leave blank for unauthenticated access. 
+
+| | |
+|----------|-----------------|
+| **Kind** |  string |
+| **Required** |  No |
+| **Default** | ` ` | 
+
+###  docker_registry.password
+
+ Password for the above username. 
 
 | | |
 |----------|-----------------|
