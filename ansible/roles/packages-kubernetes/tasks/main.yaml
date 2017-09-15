@@ -6,6 +6,7 @@
       state: present
       disablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}*{% endif %}'
       enablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}kismatic-*{% endif %}'
+      disable_gpg_check: '{{ package_repository_urls is defined and package_repository_urls != "" }}'
     register: kubelet_installation_rpm
     until: kubelet_installation_rpm|success
     retries: 3
@@ -19,6 +20,7 @@
       state: present
       disablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}*{% endif %}'
       enablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}kismatic-*{% endif %}'
+      disable_gpg_check: '{{ package_repository_urls is defined and package_repository_urls != "" }}'
     when: "'master' in group_names"
     register: result
     until: result|success

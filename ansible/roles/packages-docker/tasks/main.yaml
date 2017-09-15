@@ -6,6 +6,7 @@
       state: present
       disablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}*{% endif %}'
       enablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}kismatic-*{% endif %}'
+      disable_gpg_check: '{{ package_repository_urls is defined and package_repository_urls != "" }}'
     register: docker_installation_rpm
     until: docker_installation_rpm|success
     retries: 3
