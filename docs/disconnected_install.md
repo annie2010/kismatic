@@ -81,85 +81,16 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
 EOF'
 ```
 
-### Create list of transitive dependencies 
-
-With this script, we list all the transitive dependencies of the packages required for a KET installation. The final list is stored in `pkgs.txt`.
-
-```
-# Get the dependencies for the packages we require and write them to pkgs.txt
-packages="docker-engine-1.12.6-1.el7.centos kubelet-1.7.4-0 kubectl-1.7.4-0"
-for pkg in $packages
-do
-    # Add our pkg to the list
-    echo $pkg >> pkgs.dup.txt
-    # Get the dependency tree for the pkg
-    repoquery --archlist=`uname -m`,noarch --tree-requires $pkg |
-    # Remove the pkg from the output, as it's already in the list
-    tail -n +2 | 
-    # Do some output cleanup
-    sed 's/[\\|]//g' | tr -s ' ' |
-    # Select the package name fields
-    cut -d ' ' -f 3 |
-    # Sort and unique the package list
-    sort | uniq >> pkgs.dup.txt
-done
-# De-duplicate the packages in the file
-sort pkgs.dup.txt | uniq > pkgs.txt
-rm -f pkgs.dup.txt
-```
-
-### Configure custom repos for syncing
-To prevent downloading entire repositories, we need to configure repository sources that will only provide the packages we are interested in.
-
-```
-pkgs=$(cat pkgs.txt)
-cat <<'EOF' > /etc/yum.repos.d/centos-base-limited.repo
-[centos-base-limited]
-name=CentOS-$releasever - Base
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os&infra=$infra
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-EOF
-echo "includepkgs=$(echo $pkgs)" >> /etc/yum.repos.d/centos-base-limited.repo
-
-cat <<'EOF' > /etc/yum.repos.d/centos-updates-limited.repo
-[centos-updates-limited]
-name=CentOS-$releasever - Updates
-mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=updates&infra=$infra
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-EOF
-echo "includepkgs=$(echo $pkgs)" >> /etc/yum.repos.d/centos-updates-limited.repo
-
-cat <<EOF > /etc/yum.repos.d/docker-limited.repo
-[docker-limited]
-name=Docker
-baseurl=https://yum.dockerproject.org/repo/main/centos/7/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://yum.dockerproject.org/gpg
-includepkgs=$(echo $pkgs)
-EOF
-
-cat <<EOF > /etc/yum.repos.d/kubernetes-limited.repo
-[kubernetes-limited]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-includepkgs=$(echo $pkgs)
-EOF
-```
-
 ### Download the RPMs using reposync
 Sync the desired packages to the local machine, and place them in `/var/www/html`.
 
 ```
-reposync -p /var/www/html/ -r centos-base-limited -r kubernetes-limited -r docker-limited -r centos-updates-limited
+reposync -p /var/www/html/ -r base -r updates -r docker
+
+# The kubernetes repo is special as it places the packages in an unexpected location.
+reposync -p /var/www/html -r kubernetes
+mv /var/www/pool/* /var/www/html/kubernetes/
+rmdir /var/www/pool
 ```
 
 ### Create a repository
