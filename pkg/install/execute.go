@@ -38,6 +38,7 @@ type Executor interface {
 	ValidateControlPlane(plan Plan) error
 	UpgradeDockerRegistry(plan Plan) error
 	UpgradeClusterServices(plan Plan) error
+	SeedRegistry(plan Plan) error
 }
 
 // DiagnosticsExecutor will run diagnostics on the nodes after an install

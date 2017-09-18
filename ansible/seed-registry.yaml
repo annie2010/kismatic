@@ -1,0 +1,22 @@
+---
+  - hosts: localhost
+    any_errors_fatal: true
+    gather_facts: false
+    become: false
+    name: Seed Registry
+    vars_files:
+      - group_vars/all.yaml
+
+    tasks:
+      - name: pull required images
+        local_action: command docker pull {{ item }}
+        with_items: "{{ upstream_images.values() }}"
+
+      - name: tag images
+        local_action: command docker tag {{ item }} {{ docker_registry_full_url }}/{{ item }}
+        with_items: "{{ upstream_images.values() }}"
+
+      - name: push images to private registry
+        local_action: command docker push {{ docker_registry_full_url }}/{{ item }}
+        with_items: "{{ upstream_images.values() }}"
+        
