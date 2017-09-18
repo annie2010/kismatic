@@ -13,4 +13,3 @@
               (package_repository_urls is defined and package_repository_urls == ""))
       - role: packages-repo-custom
         when: package_repository_urls is defined and package_repository_urls != ""
-
